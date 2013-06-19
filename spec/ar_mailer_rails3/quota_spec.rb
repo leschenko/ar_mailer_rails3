@@ -95,6 +95,20 @@ describe 'mails quota for period' do
         @mailer.store_emails_stat
         expect { @mailer.run }.to_not change { @mailer.emails_count }
       end
+
+      it 'don\'t use old emails stat' do
+        @mailer.start_period = Time.now.utc.to_i - 100
+        @mailer.emails_count = 10
+        @mailer.store_emails_stat
+        expect { @mailer.run }.to change { @mailer.emails_count }.from(10).to(2)
+      end
+
+      it 'use fresh emails stat' do
+        @mailer.quota = 4
+        @mailer.emails_count = 1
+        @mailer.store_emails_stat
+        expect { @mailer.run }.to change { @mailer.emails_count }.from(1).to(4)
+      end
     end
 
     it 'run without quota' do

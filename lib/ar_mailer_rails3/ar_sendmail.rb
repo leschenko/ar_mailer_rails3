@@ -358,8 +358,10 @@ module ArMailerRails3
       @max_age = options[:MaxAge]
 
       @quota = options[:Quota]
-      @period = options[:Period] || 86400
-      @quota_filename = quota_filename
+      if @quota
+        @period = options[:Period] || 86400
+        @quota_filename = quota_filename
+      end
       reset_emails_stat
 
       @failed_auth_count = 0
