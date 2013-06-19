@@ -1,23 +1,23 @@
 require 'optparse'
 require 'net/smtp'
-require 'smtp_tls' unless Net::SMTP.instance_methods.include?("enable_starttls_auto")
+require 'smtp_tls' unless Net::SMTP.instance_methods.include?('enable_starttls_auto')
 
 ##
 # Hack in RSET
 
 module Net # :nodoc:
-class SMTP # :nodoc:
+  class SMTP # :nodoc:
 
-  unless instance_methods.include? 'reset' then
-    ##
-    # Resets the SMTP connection.
+    unless instance_methods.include? 'reset' then
+      ##
+      # Resets the SMTP connection.
 
-    def reset
-      getok 'RSET'
+      def reset
+        getok 'RSET'
+      end
     end
-  end
 
-end
+  end
 end
 
 ##
@@ -35,7 +35,9 @@ end
 # * --daemon
 # * --mailq
 
-module ArMailerRails3; end
+module ArMailerRails3
+  ;
+end
 
 class ArMailerRails3::ARSendmail
 
@@ -92,11 +94,11 @@ class ArMailerRails3::ARSendmail
 
   ##
   # Get email class
-  
+
   def self.email_class
     ActionMailer::Base.active_record_settings[:email_class]
   end
-  
+
   ##
   # Prints a list of unsent emails and the last delivery attempt, if any.
   #
@@ -108,21 +110,21 @@ class ArMailerRails3::ARSendmail
     emails = self.email_class.find :all
 
     if emails.empty? then
-      puts "Mail queue is empty"
+      puts 'Mail queue is empty'
       return
     end
 
     total_size = 0
 
-    puts "-Queue ID- --Size-- ----Arrival Time---- -Sender/Recipient-------"
+    puts '-Queue ID- --Size-- ----Arrival Time---- -Sender/Recipient-------'
     emails.each do |email|
       size = email.mail.length
       total_size += size
 
       create_timestamp = email.created_on rescue
-                         email.created_at rescue
-                         Time.at(email.created_date) rescue # for Robot Co-op
-                         nil
+          email.created_at rescue
+              Time.at(email.created_date) rescue # for Robot Co-op
+                  nil
 
       created = if create_timestamp.nil? then
                   '             Unknown'
@@ -130,7 +132,7 @@ class ArMailerRails3::ARSendmail
                   create_timestamp.strftime '%a %b %d %H:%M:%S'
                 end
 
-      puts "%10d %8d %s  %s" % [email.id, size, created, email.from]
+      puts '%10d %8d %s  %s' % [email.id, size, created, email.from]
       if email.last_send_attempt > 0 then
         puts "Last send attempt: #{Time.at email.last_send_attempt}"
       end
@@ -168,47 +170,58 @@ class ArMailerRails3::ARSendmail
       opts.separator ''
       opts.separator 'Sendmail options:'
 
-      opts.on("-b", "--batch-size BATCH_SIZE",
-              "Maximum number of emails to send per delay",
-              "Default: Deliver all available emails", Integer) do |batch_size|
+      opts.on('-b', '--batch-size BATCH_SIZE',
+              'Maximum number of emails to send per delay',
+              'Default: Deliver all available emails', Integer) do |batch_size|
         options[:BatchSize] = batch_size
       end
 
-      opts.on(      "--delay DELAY",
-              "Delay between checks for new mail",
-              "in the database",
+      opts.on('--delay DELAY',
+              'Delay between checks for new mail',
+              'in the database',
               "Default: #{options[:Delay]}", Integer) do |delay|
         options[:Delay] = delay
       end
 
-      opts.on(      "--max-age MAX_AGE",
-              "Maxmimum age for an email. After this",
-              "it will be removed from the queue.",
-              "Set to 0 to disable queue cleanup.",
+      opts.on('-q', '--quota QUOTA', Integer,
+              'Quota of emails per period') do |quota|
+        options[:Quota] = quota
+      end
+
+      opts.on('-r', '--period PERIOD', Integer,
+              'Period for quota in seconds',
+              'Default: 1 day') do |period|
+        options[:Period] = period
+      end
+
+      opts.on('--max-age MAX_AGE',
+              'Maxmimum age for an email. After this',
+              'it will be removed from the queue.',
+              'Set to 0 to disable queue cleanup.',
               "Default: #{options[:MaxAge]} seconds", Integer) do |max_age|
         options[:MaxAge] = max_age
       end
 
-      opts.on("-o", "--once",
-              "Only check for new mail and deliver once",
+      opts.on('-o', '--once',
+              'Only check for new mail and deliver once',
               "Default: #{options[:Once]}") do |once|
         options[:Once] = once
       end
 
-      opts.on("-d", "--daemonize",
-              "Run as a daemon process",
+      opts.on('-d', '--daemonize',
+              'Run as a daemon process',
               "Default: #{options[:Daemon]}") do |daemon|
         options[:Daemon] = true
       end
 
-      opts.on("-p", "--pidfile PIDFILE",
-              "Set the pidfile location",
+      opts.on('-p', '--pidfile PIDFILE',
+              'Set the pidfile location',
               "Default: #{options[:Chdir]}#{options[:Pidfile]}", String) do |pidfile|
         options[:Pidfile] = pidfile
       end
 
-      opts.on(      "--mailq",
-              "Display a list of emails waiting to be sent") do |mailq|
+      opts.on('--mailq',
+              'Display a list of emails waiting to be sent') do |mailq|
         options[:MailQ] = true
       end
 
@@ -218,32 +231,32 @@ class ArMailerRails3::ARSendmail
       opts.separator ''
       opts.separator 'Generic Options:'
 
-      opts.on("-c", "--chdir PATH",
-              "Use PATH for the application path",
+      opts.on('-c', '--chdir PATH',
+              'Use PATH for the application path',
               "Default: #{options[:Chdir]}") do |path|
         usage opts, "#{path} is not a directory" unless File.directory? path
         usage opts, "#{path} is not readable" unless File.readable? path
         options[:Chdir] = path
       end
 
-      opts.on("-e", "--environment RAILS_ENV",
-              "Set the RAILS_ENV constant",
+      opts.on('-e', '--environment RAILS_ENV',
+              'Set the RAILS_ENV constant',
               "Default: #{options[:RailsEnv]}") do |env|
         options[:RailsEnv] = env
       end
 
-      opts.on("-v", "--[no-]verbose",
-              "Be verbose",
+      opts.on('-v', '--[no-]verbose',
+              'Be verbose',
               "Default: #{options[:Verbose]}") do |verbose|
         options[:Verbose] = verbose
       end
 
-      opts.on("-h", "--help",
+      opts.on('-h', '--help',
               "You're looking at it") do
         usage opts
       end
 
-      opts.on("--version", "Version of ARMailer") do
+      opts.on('--version', 'Version of ARMailer') do
         usage "ar_mailer #{VERSION} (adzap fork)"
       end
 
@@ -286,18 +299,18 @@ class ArMailerRails3::ARSendmail
       if File.exists? @@pid_file
         # check to see if process is actually running
         pid = ''
-        File.open(@@pid_file, 'r') {|f| pid = f.read.chomp }
+        File.open(@@pid_file, 'r') { |f| pid = f.read.chomp }
         if system("ps -p #{pid} | grep #{pid}") # returns true if process is running, o.w. false
           $stderr.puts "Warning: The pid file #{@@pid_file} exists and ar_sendmail is running. Shutting down."
           exit -1
         else
           # not running, so remove existing pid file and continue
           self.remove_pid_file
-          $stderr.puts "ar_sendmail is not running. Removing existing pid file and starting up..."
+          $stderr.puts 'ar_sendmail is not running. Removing existing pid file and starting up...'
         end
       end
       WEBrick::Daemon.start
-      File.open(@@pid_file, 'w') {|f| f.write("#{Process.pid}\n")}
+      File.open(@@pid_file, 'w') { |f| f.write("#{Process.pid}\n") }
     end
 
     new(options).run
@@ -344,6 +357,10 @@ class ArMailerRails3::ARSendmail
     @verbose = options[:Verbose]
     @max_age = options[:MaxAge]
 
+    @quota = options[:Quota]
+    @period = options[:Period] || 86400
+    @quota_filename = quota_filename
+
     @failed_auth_count = 0
   end
 
@@ -365,10 +382,10 @@ class ArMailerRails3::ARSendmail
 
   def deliver(emails)
     settings = [
-      smtp_settings[:domain],
-      (smtp_settings[:user] || smtp_settings[:user_name]),
-      smtp_settings[:password],
-      smtp_settings[:authentication]
+        smtp_settings[:domain],
+        (smtp_settings[:user] || smtp_settings[:user_name]),
+        smtp_settings[:password],
+        smtp_settings[:authentication]
     ]
 
     smtp = Net::SMTP.new(smtp_settings[:address], smtp_settings[:port])
@@ -385,21 +402,21 @@ class ArMailerRails3::ARSendmail
         begin
           res = session.send_message email.mail, email.from, email.to
           email.destroy
-          log "sent email %011d from %s to %s: %p" %
-                [email.id, email.from, email.to, res]
+          log 'sent email %011d from %s to %s: %p' %
+                  [email.id, email.from, email.to, res]
         rescue Net::SMTPFatalError => e
           log "5xx error sending email %d, removing from queue: %p(%s):\n\t%s" %
-                [email.id, e.message, e.class, e.backtrace.join("\n\t")]
+                  [email.id, e.message, e.class, e.backtrace.join("\n\t")]
           email.destroy
           session.reset
         rescue Net::SMTPServerBusy => e
-          log "server too busy, stopping delivery cycle"
+          log 'server too busy, stopping delivery cycle'
           return
         rescue Net::SMTPUnknownError, Net::SMTPSyntaxError, TimeoutError, Timeout::Error => e
           email.last_send_attempt = Time.now.to_i
           email.save rescue nil
           log "error sending email %d: %p(%s):\n\t%s" %
-                [email.id, e.message, e.class, e.backtrace.join("\n\t")]
+                  [email.id, e.message, e.class, e.backtrace.join("\n\t")]
           session.reset
         end
       end
@@ -421,7 +438,7 @@ class ArMailerRails3::ARSendmail
   # Prepares ar_sendmail for exiting
 
   def do_exit
-    log "caught signal, shutting down"
+    log 'caught signal, shutting down'
     self.class.remove_pid_file
     exit 130
   end
@@ -431,7 +448,7 @@ class ArMailerRails3::ARSendmail
   # last 300 seconds.
 
   def find_emails
-    options = { :conditions => ['last_send_attempt < ?', Time.now.to_i - 300] }
+    options = {:conditions => ['last_send_attempt < ?', Time.now.to_i - 300]}
     options[:limit] = batch_size unless batch_size.nil?
     mail = self.class.email_class.find :all, options
 
@@ -443,8 +460,12 @@ class ArMailerRails3::ARSendmail
   # Installs signal handlers to gracefully exit.
 
   def install_signal_handlers
-    trap 'TERM' do do_exit end
-    trap 'INT'  do do_exit end
+    trap 'TERM' do
+      do_exit
+    end
+    trap 'INT' do
+      do_exit
+    end
   end
 
   ##
@@ -464,13 +485,51 @@ class ArMailerRails3::ARSendmail
 
     loop do
       begin
-        cleanup
-        emails = find_emails
-        deliver(emails) unless emails.empty?
+        unless exceed_quota?
+          cleanup
+          emails = find_emails
+          deliver(emails) unless emails.empty?
+          @emails_count += emails.length
+          store_emails_stat
+        end
       rescue
       end
       break if @once
       sleep @delay
+    end
+  end
+
+  def exceed_quota?
+    return false unless @quota
+    fetch_emails_stat
+    if @start_period + @period < Time.now.utc.to_i
+      @quota - @batch_size >= @emails_count
+    else
+      reset_emails_stat
+      false
+    end
+  end
+
+  def fetch_emails_stat
+    reset_emails_stat
+    if File.exists?(@quota_filename)
+      @start_period, @emails_count = File.read(@quota_filename).split("\n").map(&:to_i)
+    end
+  end
+
+  def store_emails_stat
+    File.open(@quota_filename, 'w+') { |f| f.write [@start_period, @emails_count].join(' ') }
+  end
+
+  def reset_emails_stat
+    @start_period, @emails_count = Time.now.utc.to_i, 0
+  end
+
+  def quota_filename
+    if defined? Rails
+      Rails.root.join('tmp', 'ar_mailer_rails3_quota')
+    else
+      File.expand_path('../../../ar_mailer_rails3_quota', __FILE__)
     end
   end
 
