@@ -1,3 +1,6 @@
+lib = File.expand_path('../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+
 Gem::Specification.new do |gem|
   gem.name = 'ar_sendmail_rails3'
   gem.version = '2.1.11'
@@ -12,5 +15,6 @@ Gem::Specification.new do |gem|
   gem.test_files = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = %w(lib)
 
+  gem.add_development_dependency 'rake'
   gem.add_development_dependency 'rspec'
 end

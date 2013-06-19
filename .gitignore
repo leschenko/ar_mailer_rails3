@@ -4,3 +4,6 @@ pkg
 .idea
 .rvmrc
 ar_mailer_rails3_quota
+bin
+.bundle
+.rspec
