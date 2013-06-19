@@ -3,7 +3,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |gem|
   gem.name = 'ar_mailer_rails3'
-  gem.version = '2.1.12'
+  gem.version = '2.1.11'
   gem.authors = ['Yuanyi Zhang']
   gem.email = %w(leschenko.al@gmail.com)
   gem.summary = %q{ArMailer wrapper for Rails 3}
