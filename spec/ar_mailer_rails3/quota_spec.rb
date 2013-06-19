@@ -14,6 +14,11 @@ describe 'mails quota for period' do
     options[:Period].should be_nil
   end
 
+  it 'default period if quota' do
+    @mailer = ArMailerRails3::ARSendmail.new(Quota: 2)
+    @mailer.period.should == 86400
+  end
+
   context 'mails with quota' do
     before do
       @mailer = ArMailerRails3::ARSendmail.new(Quota: 2, Period: 5, Once: true)

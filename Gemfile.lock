@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ar_sendmail_rails3 (2.1.11)
+    ar_mailer_rails3 (2.1.12)
 
 GEM
   remote: https://rubygems.org/
@@ -21,6 +21,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  ar_sendmail_rails3!
+  ar_mailer_rails3!
   rake
   rspec

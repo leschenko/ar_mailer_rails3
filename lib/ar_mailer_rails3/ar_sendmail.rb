@@ -384,6 +384,15 @@ module ArMailerRails3
     # Delivers +emails+ to ActionMailer's SMTP server and destroys them.
 
     def deliver(emails)
+      # for dev testing
+      if smtp_settings[:domain] == 'stub'
+        emails.each do |email|
+          log ['STUB EMAIL', email.id, email.from, email.to].join(' ')
+          email.destroy
+        end
+        return
+      end
+
       settings = [
           smtp_settings[:domain],
           (smtp_settings[:user] || smtp_settings[:user_name]),
@@ -475,8 +484,9 @@ module ArMailerRails3
     # Logs +message+ if verbose
 
     def log(message)
-      $stderr.puts message if @verbose
-      ActionMailer::Base.logger.info "ar_sendmail: #{message}"
+      msg = "[#{Time.now}] ar_sendmail: #{message}"
+      $stderr.puts msg if @verbose
+      ActionMailer::Base.logger.info msg
     end
 
     ##
@@ -488,14 +498,16 @@ module ArMailerRails3
 
       loop do
         begin
-          unless exceed_quota?
+          if exceed_quota?
+            log "quota #{@quota} exceeded until #{Time.at(@start_period + @period)}"
+          else
             cleanup
             emails = find_emails.first(available_quota)
             deliver(emails) unless emails.empty?
             @emails_count += emails.length
             store_emails_stat
           end
-        #rescue
+        rescue
         end
         break if @once
         sleep @delay
