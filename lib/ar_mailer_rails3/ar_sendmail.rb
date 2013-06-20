@@ -486,7 +486,7 @@ module ArMailerRails3
     def log(message)
       msg = "[#{Time.now}] ar_sendmail: #{message}"
       $stderr.puts msg if @verbose
-      ActionMailer::Base.logger.info msg
+      Rails.logger.info msg if defined? Rails
     end
 
     ##
