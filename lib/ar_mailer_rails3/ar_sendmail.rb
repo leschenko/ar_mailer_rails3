@@ -388,6 +388,7 @@ module ArMailerRails3
       if smtp_settings[:domain] == 'stub'
         emails.each do |email|
           log ['STUB EMAIL', email.id, email.from, email.to].join(' ')
+          @emails_count += 1
           email.destroy
         end
         return
@@ -413,6 +414,7 @@ module ArMailerRails3
           email = emails.shift
           begin
             res = session.send_message email.mail, email.from, email.to
+            @emails_count += 1
             email.destroy
             log 'sent email %011d from %s to %s: %p' %
                     [email.id, email.from, email.to, res]
@@ -503,7 +505,7 @@ module ArMailerRails3
           else
             cleanup
             emails = find_emails.first(available_quota)
-            @emails_count += emails.length
+            #@emails_count += emails.length
             deliver(emails) unless emails.empty?
             store_emails_stat
           end

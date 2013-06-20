@@ -31,7 +31,9 @@ describe 'mails quota for period' do
       @mailer = ArMailerRails3::ARSendmail.new(Quota: 2, Period: 5, Once: true)
       FileUtils.rm_f(@mailer.quota_filename)
       @mailer.stub(:find_emails).and_return(Array.new(3))
-      @mailer.stub(:deliver)
+      @mailer.stub(:deliver) do |emails|
+        @mailer.emails_count += emails.length
+      end
       @mailer.stub(:cleanup)
     end
 
