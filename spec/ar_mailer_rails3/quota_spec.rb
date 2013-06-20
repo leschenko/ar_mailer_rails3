@@ -8,6 +8,13 @@ describe 'mails quota for period' do
     options[:Period].should == 100
   end
 
+  it 'parse quota options' do
+    options = ArMailerRails3::ARSendmail.process_args %w(-q 10)
+    options[:Quota].should == 10
+    @mailer = ArMailerRails3::ARSendmail.new(Quota: 2)
+    @mailer.period.should == 86400
+  end
+
   it 'don\'t set default quota options' do
     options = ArMailerRails3::ARSendmail.process_args %w()
     options[:Quota].should be_nil

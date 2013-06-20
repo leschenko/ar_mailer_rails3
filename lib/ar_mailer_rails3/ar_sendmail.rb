@@ -506,6 +506,7 @@ module ArMailerRails3
             deliver(emails) unless emails.empty?
             @emails_count += emails.length
             store_emails_stat
+            log "store_emails_stat #{[@start_period, @emails_count, emails.length]}"
           end
         rescue
         end
@@ -521,6 +522,7 @@ module ArMailerRails3
         available_quota.zero?
       else
         reset_emails_stat
+        log 'reset_emails_stat'
         false
       end
     end
