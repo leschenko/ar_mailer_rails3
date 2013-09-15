@@ -48,7 +48,8 @@ describe 'mails quota for period' do
     describe '#find_emails' do
       it 'find emails with domain' do
         ArMailerRails3::ARSendmail.stub(:email_class).and_return(CustomEmailClass)
-        CustomEmailClass.should_receive(:find).with(:all, hash_including({domain: 'vf'})).and_return([])
+        CustomEmailClass.should_receive(:where).and_return(CustomEmailClass)
+        CustomEmailClass.should_receive(:where).with(domain: 'vf').and_return(CustomEmailClass)
         @mailer.run
       end
     end

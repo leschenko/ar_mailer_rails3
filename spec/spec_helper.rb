@@ -16,4 +16,21 @@ end
 
 
 class CustomEmailClass
+  class << self
+    def where(*cond)
+      self
+    end
+
+    def limit(l)
+      self
+    end
+
+    def length
+      0
+    end
+
+    def first(n=1)
+      []
+    end
+  end
 end
