@@ -1,4 +1,5 @@
 require 'optparse'
+require 'yaml'
 require 'net/smtp'
 require 'smtp_tls' unless Net::SMTP.instance_methods.include?('enable_starttls_auto')
 
@@ -79,7 +80,7 @@ module ArMailerRails3
 
     attr_accessor :failed_auth_count
 
-    attr_accessor :quota, :period, :quota_filename, :emails_count, :start_period
+    attr_accessor :quota, :period, :quota_filename, :emails_count, :start_period, :domains, :current_domain, :smtp_config
 
     @@pid_file = nil
 
@@ -193,6 +194,11 @@ module ArMailerRails3
           options[:Period] = period
         end
 
+        opts.on('-s', '--smtp_config_path CONFIG_PATH', String,
+                'Smtp config file path') do |path|
+          options[:smtp_config_path] = path
+        end
+
         opts.on('--max-age MAX_AGE',
                 'Maxmimum age for an email. After this',
                 'it will be removed from the queue.',
@@ -279,7 +285,7 @@ module ArMailerRails3
         end
       end
 
-      return options
+      options
     end
 
     ##
@@ -356,6 +362,11 @@ module ArMailerRails3
       @once = options[:Once]
       @verbose = options[:Verbose]
       @max_age = options[:MaxAge]
+      
+      if options[:smtp_config_path]
+        @smtp_config = YAML.load_file(options[:smtp_config_path]).each_with_object({}) { |(k, v), h| h[k] = v.symbolize_keys }
+        @domains = @smtp_config.keys
+      end
 
       @quota = options[:Quota]
       if @quota
@@ -463,6 +474,7 @@ module ArMailerRails3
 
     def find_emails
       options = {:conditions => ['last_send_attempt < ?', Time.now.to_i - 300]}
+      options[:domain] = @current_domain if @current_domain
       options[:limit] = batch_size unless batch_size.nil?
       mail = self.class.email_class.find :all, options
 
@@ -494,7 +506,6 @@ module ArMailerRails3
     ##
     # Scans for emails and delivers them every delay seconds.  Only returns if
     # once is true.
-
     def run
       install_signal_handlers
 
@@ -504,12 +515,16 @@ module ArMailerRails3
             log "quota #{@quota} exceeded until #{Time.at(@start_period + @period)}"
           else
             cleanup
+            if @domains
+              @current_domain = @domains.first
+              @domains.rotate!
+            end
             emails = find_emails.first(available_quota)
-            #@emails_count += emails.length
             deliver(emails) unless emails.empty?
-            store_emails_stat
+            store_emails_stat if @quota
           end
-        rescue
+        rescue => e
+          raise(e) unless defined? Rails
         end
         break if @once
         sleep @delay
@@ -563,7 +578,11 @@ module ArMailerRails3
     # backwards compatibility.
 
     def smtp_settings
-      ActionMailer::Base.smtp_settings rescue ActionMailer::Base.server_settings
+      if @smtp_config && @current_domain
+        @smtp_config[@current_domain]
+      else
+        ActionMailer::Base.smtp_settings
+      end
     end
 
   end

@@ -3,6 +3,7 @@ class <%= migration_class_name.gsub(/::/, '') %> < ActiveRecord::Migration
     create_table :<%= table_name %> do |t|
       t.column :from, :string
       t.column :to, :string
+      t.column :domain, :string
       t.column :last_send_attempt, :integer, :default => 0
       t.column :mail, :text
       t.column :created_on, :datetime

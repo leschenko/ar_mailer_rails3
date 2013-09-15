@@ -1,0 +1,17 @@
+vf:
+  address: 'smtp.example.com'
+  port: 587
+  domain: 'vf.com'
+  authentication: 'plain'
+  enable_starttls_auto: true
+  user_name: 'info@vf.com'
+  password: 'password'
+eg:
+  address: 'smtp.example.com'
+  port: 587
+  domain: 'eg.com'
+  authentication: 'plain'
+  enable_starttls_auto: true
+  user_name: 'info@eg.com'
+  password: 'password'
+

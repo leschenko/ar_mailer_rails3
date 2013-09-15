@@ -2,23 +2,25 @@ require 'spec_helper'
 
 describe 'mails quota for period' do
 
-  it 'parse quota options' do
-    options = ArMailerRails3::ARSendmail.process_args %w(-q 10 -r 100)
-    options[:Quota].should == 10
-    options[:Period].should == 100
-  end
+  context 'parse options' do
+    it 'quota and period' do
+      options = ArMailerRails3::ARSendmail.process_args %w(-q 10 -r 100)
+      options[:Quota].should == 10
+      options[:Period].should == 100
+    end
 
-  it 'parse quota options' do
-    options = ArMailerRails3::ARSendmail.process_args %w(-q 10)
-    options[:Quota].should == 10
-    @mailer = ArMailerRails3::ARSendmail.new(Quota: 2)
-    @mailer.period.should == 86400
-  end
+    it 'quota without period' do
+      options = ArMailerRails3::ARSendmail.process_args %w(-q 10)
+      options[:Quota].should == 10
+      @mailer = ArMailerRails3::ARSendmail.new(Quota: 2)
+      @mailer.period.should == 86400
+    end
 
-  it 'don\'t set default quota options' do
-    options = ArMailerRails3::ARSendmail.process_args %w()
-    options[:Quota].should be_nil
-    options[:Period].should be_nil
+    it 'don\'t set default quota options' do
+      options = ArMailerRails3::ARSendmail.process_args %w()
+      options[:Quota].should be_nil
+      options[:Period].should be_nil
+    end
   end
 
   it 'default period if quota' do
