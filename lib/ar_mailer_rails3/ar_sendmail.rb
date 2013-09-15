@@ -366,6 +366,7 @@ module ArMailerRails3
       if options[:smtp_config_path]
         @smtp_config = YAML.load_file(options[:smtp_config_path]).each_with_object({}) { |(k, v), h| h[k] = v.symbolize_keys }
         @domains = @smtp_config.keys
+        log "INIT DOMAINS #{@domains}"
       end
 
       @quota = options[:Quota]
@@ -524,6 +525,7 @@ module ArMailerRails3
             store_emails_stat if @quota
           end
         rescue => e
+          log "ERROR #{e.message} \n #{e.backtrace}"
           raise(e) unless defined? Rails
         end
         break if @once
