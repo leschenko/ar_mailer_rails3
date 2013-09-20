@@ -431,8 +431,8 @@ module ArMailerRails3
             log 'sent email %011d from %s to %s: %p' %
                     [email.id, email.from, email.to, res]
           rescue Net::SMTPFatalError => e
-            log "5xx error sending email %d, removing from queue: %p(%s):\n\t%s" %
-                    [email.id, e.message, e.class, e.backtrace.join("\n\t")]
+            log "5xx error sending email %d from %s to %s, removing from queue: %p(%s):\n\t%s" %
+                    [email.id, email.from, email.to, e.message, e.class, e.backtrace.join("\n\t")]
             email.destroy
             session.reset
           rescue Net::SMTPServerBusy => e
@@ -441,8 +441,8 @@ module ArMailerRails3
           rescue Net::SMTPUnknownError, Net::SMTPSyntaxError, TimeoutError, Timeout::Error => e
             email.last_send_attempt = Time.now.to_i
             email.save rescue nil
-            log "error sending email %d: %p(%s):\n\t%s" %
-                    [email.id, e.message, e.class, e.backtrace.join("\n\t")]
+            log "error sending email %d from %s to %s: %p(%s):\n\t%s" %
+                    [email.id, email.from, email.to, e.message, e.class, e.backtrace.join("\n\t")]
             session.reset
           end
         end
