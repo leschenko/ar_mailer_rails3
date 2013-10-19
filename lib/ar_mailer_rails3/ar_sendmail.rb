@@ -479,7 +479,8 @@ module ArMailerRails3
       emails = emails.limit(batch_size) unless batch_size.nil?
 
       log "found #{emails.length} emails to send"
-      emails
+      # call `to_a` to prevent further limit overrides like with `first` method
+      emails.to_a
     end
 
     ##
