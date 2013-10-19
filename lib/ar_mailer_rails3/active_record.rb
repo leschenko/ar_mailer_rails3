@@ -46,7 +46,7 @@ module ArMailerRails3
       destinations = mail.destinations
       sender = mail.return_path || mail.sender || mail.from_addrs.first
       destinations.each do |destination|
-        self.email_class.create :mail => mail.encoded, :to => destination, :from => sender, :domain => Thread.current[:current_domain]
+        self.email_class.create :mail => mail.encoded, :to => destination, :from => sender, :domain => Thread.current[:current_domain].try(:code)
       end
     end
   end
